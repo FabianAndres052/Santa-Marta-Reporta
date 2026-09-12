@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700">
+<rect width="1200" height="700" fill="#f7fbff"/><rect width="1200" height="100" fill="#0b315e"/>
+<text x="60" y="65" fill="white" font-family="Arial" font-size="42" font-weight="700">¿Cómo funciona un reporte?</text>
+<g font-family="Arial" text-anchor="middle">
+<g><circle cx="150" cy="230" r="80" fill="#2f80ed"/><text x="150" y="245" fill="white" font-size="42" font-weight="700">1</text><text x="150" y="350" font-size="28" font-weight="700">IDENTIFICA</text><text x="150" y="385" font-size="20">Encuentra el problema</text></g>
+<g><circle cx="450" cy="230" r="80" fill="#16a085"/><text x="450" y="245" fill="white" font-size="42" font-weight="700">2</text><text x="450" y="350" font-size="28" font-weight="700">DOCUMENTA</text><text x="450" y="385" font-size="20">Foto + descripción</text></g>
+<g><circle cx="750" cy="230" r="80" fill="#e67e22"/><text x="750" y="245" fill="white" font-size="42" font-weight="700">3</text><text x="750" y="350" font-size="28" font-weight="700">UBICA</text><text x="750" y="385" font-size="20">Indica el lugar</text></g>
+<g><circle cx="1050" cy="230" r="80" fill="#8e44ad"/><text x="1050" y="245" fill="white" font-size="42" font-weight="700">4</text><text x="1050" y="350" font-size="28" font-weight="700">COMPARTE</text><text x="1050" y="385" font-size="20">Envía y da seguimiento</text></g>
+</g>
+<path d="M230 230H370 M530 230H670 M830 230H970" stroke="#0b315e" stroke-width="10"/>
+<rect x="80" y="470" width="1040" height="130" rx="20" fill="#e8f2ff"/>
+<text x="600" y="525" text-anchor="middle" font-family="Arial" font-size="28" font-weight="700" fill="#0b315e">Un reporte claro facilita la priorización</text>
+<text x="600" y="565" text-anchor="middle" font-family="Arial" font-size="21" fill="#29445f">Categoría · evidencia · ubicación · descripción</text>
+</svg>

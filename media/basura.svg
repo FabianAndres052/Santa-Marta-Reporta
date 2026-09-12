@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#147d64"/><stop offset="1" stop-color="#07111f"/></linearGradient></defs>
+<rect width="1200" height="700" fill="url(#g)"/><circle cx="980" cy="130" r="80" fill="#fff" opacity=".15"/>
+<path d="M0 510 Q230 420 430 500 T850 470 T1200 500 V700 H0Z" fill="#06101c" opacity=".7"/>
+<path d="M80 470 L250 300 L400 470 M300 470 L520 250 L760 470 M650 470 L850 330 L1080 470" fill="none" stroke="#fff" stroke-width="10" opacity=".55"/>
+<text x="80" y="120" fill="#fff" font-family="Arial, sans-serif" font-size="58" font-weight="700">Residuos y limpieza</text>
+<text x="80" y="175" fill="#dcecff" font-family="Arial, sans-serif" font-size="28">Reporta puntos con acumulación de basura.</text>
+<rect x="80" y="540" width="1040" height="4" fill="#fff" opacity=".35"/>
+<text x="80" y="600" fill="#fff" font-family="Arial, sans-serif" font-size="24">Santa Marta Reporta · Participación ciudadana</text>
+</svg>
