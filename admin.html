@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portal Admin · Sistema de Gestión de Incidencias Urbanas</title>
+  <link rel="stylesheet" href="assets/css/fontawesome-all.min.css" />
+  <style>
+    /* ====== RESET & BASE ====== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --brand:       #0b315e;
+      --brand-light: #1a4f8a;
+      --accent:      #2f80ed;
+      --accent-dark: #1a5fbf;
+      --green:       #16a085;
+      --green-light: #1abc9c;
+      --orange:      #e67e22;
+      --red:         #e74c3c;
+      --yellow:      #f39c12;
+      --sidebar-w:   260px;
+      --topbar-h:    64px;
+      --bg:          #f0f4f8;
+      --card-bg:     #ffffff;
+      --text:        #2d3748;
+      --muted:       #718096;
+      --border:      #e2e8f0;
+      --shadow:      0 2px 12px rgba(0,0,0,.08);
+      --shadow-lg:   0 8px 32px rgba(0,0,0,.12);
+      --radius:      12px;
+      --radius-sm:   8px;
+    }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ====== SIDEBAR ====== */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-height: 100vh;
+      background: linear-gradient(180deg, var(--brand) 0%, #0d2d52 100%);
+      position: fixed;
+      top: 0; left: 0;
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      box-shadow: 4px 0 24px rgba(0,0,0,.18);
+      transition: transform .3s ease;
+    }
+    .sidebar-logo {
+      padding: 1.5rem 1.4rem 1.2rem;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+    .sidebar-logo .logo-icon {
+      width: 40px; height: 40px;
+      background: var(--accent);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; color: #fff;
+      flex-shrink: 0;
+    }
+    .sidebar-logo .logo-text { line-height: 1.2; }
+    .sidebar-logo .logo-text strong {
+      display: block; color: #fff; font-size: .95rem; font-weight: 700;
+    }
+    .sidebar-logo .logo-text span {
+      font-size: .72rem; color: rgba(255,255,255,.55); letter-spacing: .03em;
+    }
+    .sidebar-nav { padding: 1rem 0; flex: 1; overflow-y: auto; }
+    .nav-section-label {
+      padding: .6rem 1.4rem .3rem;
+      font-size: .68rem; font-weight: 700; letter-spacing: .1em;
+      color: rgba(255,255,255,.35); text-transform: uppercase;
+    }
+    .sidebar-nav a {
+      display: flex; align-items: center; gap: .75rem;
+      padding: .72rem 1.4rem;
+      color: rgba(255,255,255,.7);
+      text-decoration: none;
+      font-size: .88rem; font-weight: 500;
+      border-left: 3px solid transparent;
+      transition: all .2s;
+    }
+    .sidebar-nav a:hover { color: #fff; background: rgba(255,255,255,.07); }
+    .sidebar-nav a.active {
+      color: #fff; background: rgba(255,255,255,.12);
+      border-left-color: var(--accent);
+    }
+    .sidebar-nav a i { width: 18px; text-align: center; font-size: .9rem; }
+    .sidebar-nav .badge {
+      margin-left: auto;
+      background: var(--red);
+      color: #fff; font-size: .68rem; font-weight: 700;
+      padding: .15rem .5rem; border-radius: 999px;
+    }
+    .sidebar-footer {
+      padding: 1rem 1.4rem;
+      border-top: 1px solid rgba(255,255,255,.1);
+      font-size: .78rem; color: rgba(255,255,255,.4);
+    }
+
+    /* ====== MAIN LAYOUT ====== */
+    .main-wrapper {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ====== TOPBAR ====== */
+    .topbar {
+      height: var(--topbar-h);
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 1.75rem;
+      gap: 1rem;
+      position: sticky; top: 0; z-index: 90;
+      box-shadow: 0 1px 4px rgba(0,0,0,.05);
+    }
+    .topbar-title { flex: 1; }
+    .topbar-title h1 {
+      font-size: 1.05rem; font-weight: 700; color: var(--brand);
+    }
+    .topbar-title p {
+      font-size: .78rem; color: var(--muted); margin-top: .1rem;
+    }
+    .topbar-actions { display: flex; align-items: center; gap: .75rem; }
+    .btn {
+      display: inline-flex; align-items: center; gap: .45rem;
+      padding: .55rem 1.1rem;
+      border-radius: var(--radius-sm);
+      font-size: .83rem; font-weight: 600;
+      border: none; cursor: pointer;
+      transition: all .2s;
+      text-decoration: none;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-dark); }
+    .btn-outline {
+      background: transparent; color: var(--brand);
+      border: 1.5px solid var(--border);
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-danger { background: var(--red); color: #fff; }
+    .btn-danger:hover { background: #c0392b; }
+    .btn-sm { padding: .35rem .8rem; font-size: .78rem; }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--brand));
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 700; font-size: .85rem;
+    }
+
+    /* ====== PAGE CONTENT ====== */
+    .page-content { padding: 1.75rem; flex: 1; }
+
+    /* ====== KPI CARDS ====== */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.1rem;
+      margin-bottom: 1.75rem;
+    }
+    .kpi-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 1.35rem 1.4rem;
+      box-shadow: var(--shadow);
+      display: flex; align-items: center; gap: 1rem;
+      border-left: 4px solid transparent;
+      transition: box-shadow .2s, transform .2s;
+    }
+    .kpi-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+    .kpi-card.total   { border-left-color: var(--accent); }
+    .kpi-card.espera  { border-left-color: var(--yellow); }
+    .kpi-card.activo  { border-left-color: var(--orange); }
+    .kpi-card.resuelto{ border-left-color: var(--green); }
+    .kpi-card.respaldo{ border-left-color: var(--red); }
+    .kpi-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.25rem; flex-shrink: 0;
+    }
+    .kpi-card.total   .kpi-icon { background: #e8f1fd; color: var(--accent); }
+    .kpi-card.espera  .kpi-icon { background: #fef9e7; color: var(--yellow); }
+    .kpi-card.activo  .kpi-icon { background: #fef0e7; color: var(--orange); }
+    .kpi-card.resuelto .kpi-icon { background: #e8f8f5; color: var(--green); }
+    .kpi-card.respaldo .kpi-icon { background: #fce8e8; color: var(--red); }
+    .kpi-info { flex: 1; }
+    .kpi-num {
+      font-size: 2rem; font-weight: 800; line-height: 1;
+      color: var(--text);
+    }
+    .kpi-label {
+      font-size: .78rem; color: var(--muted); margin-top: .25rem; font-weight: 500;
+    }
+    .kpi-trend {
+      font-size: .72rem; font-weight: 600; margin-top: .3rem;
+    }
+    .kpi-trend.up   { color: var(--green); }
+    .kpi-trend.down { color: var(--red); }
+
+    /* ====== SECTION HEADER ====== */
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1rem; flex-wrap: wrap; gap: .75rem;
+    }
+    .section-header h2 {
+      font-size: 1rem; font-weight: 700; color: var(--brand);
+      display: flex; align-items: center; gap: .5rem;
+    }
+
+    /* ====== FILTER BAR ====== */
+    .filter-bar {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      box-shadow: var(--shadow);
+      display: flex; flex-wrap: wrap; gap: .75rem;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+    .filter-bar input,
+    .filter-bar select {
+      padding: .55rem .9rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: .84rem;
+      color: var(--text);
+      background: #fff;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .filter-bar input:focus,
+    .filter-bar select:focus { border-color: var(--accent); }
+    .filter-bar input { flex: 1; min-width: 200px; }
+    .filter-bar select { min-width: 160px; }
+    .filter-bar .btn { white-space: nowrap; }
+
+    /* ====== TABLE CARD ====== */
+    .table-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .table-scroll { overflow-x: auto; }
+    table {
+      width: 100%; border-collapse: collapse; font-size: .84rem;
+    }
+    thead { background: #f8fafc; }
+    thead th {
+      padding: .85rem 1rem;
+      text-align: left;
+      font-size: .75rem; font-weight: 700; letter-spacing: .04em;
+      color: var(--muted); text-transform: uppercase;
+      border-bottom: 2px solid var(--border);
+      white-space: nowrap;
+    }
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background .15s;
+    }
+    tbody tr:hover { background: #f8fafc; }
+    tbody tr:last-child { border-bottom: none; }
+    td {
+      padding: .85rem 1rem;
+      vertical-align: middle;
+    }
+    .td-id { font-weight: 700; color: var(--accent); font-family: monospace; font-size: .83rem; }
+    .td-date { color: var(--muted); font-size: .8rem; white-space: nowrap; }
+    .td-desc { max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .td-location { font-size: .82rem; color: var(--muted); }
+
+    /* ====== BADGES ====== */
+    .badge-cat, .badge-status, .badge-op {
+      display: inline-flex; align-items: center; gap: .3rem;
+      padding: .28rem .7rem;
+      border-radius: 999px;
+      font-size: .74rem; font-weight: 600;
+      white-space: nowrap;
+    }
+    .badge-cat.basura    { background: #fef3e2; color: #c07d00; }
+    .badge-cat.vial      { background: #e8edfb; color: #2d4fa4; }
+    .badge-cat.alumbrado { background: #fff8e1; color: #c08800; }
+    .badge-cat.agua      { background: #e3f4fb; color: #0d7ab0; }
+    .badge-cat.espacios  { background: #e8faf5; color: #0d7a5e; }
+
+    .badge-status.pendiente   { background: #fef9e7; color: #b8860b; }
+    .badge-status.espera      { background: #fef9e7; color: #b8860b; }
+    .badge-status.intervencion{ background: #fef0e6; color: #c96800; }
+    .badge-status.resuelto    { background: #e8f8f5; color: #0e7a5e; }
+    .badge-status.rechazado   { background: #fce8e8; color: #a91e1e; }
+
+    .badge-op.asignado   { background: #e3f0fb; color: #125a9c; }
+    .badge-op.libre      { background: #f0f0f0; color: #666; }
+    .badge-op.enCampo    { background: #fff3e0; color: #a05c00; }
+
+    /* ====== ACTIONS IN TABLE ====== */
+    .td-actions { display: flex; gap: .4rem; flex-wrap: wrap; }
+    .icon-btn {
+      width: 30px; height: 30px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .8rem; color: var(--muted);
+      cursor: pointer; background: #fff;
+      transition: all .2s;
+    }
+    .icon-btn:hover { border-color: var(--accent); color: var(--accent); background: #f0f6ff; }
+    .icon-btn.danger:hover { border-color: var(--red); color: var(--red); background: #fff5f5; }
+
+    /* ====== EVIDENCE / MEDIA ====== */
+    .evidence-pill {
+      display: inline-flex; align-items: center; gap: .3rem;
+      font-size: .74rem; color: var(--accent); font-weight: 600;
+      cursor: pointer;
+    }
+    .evidence-pill:hover { text-decoration: underline; }
+
+    /* ====== EMPTY STATE ====== */
+    .empty-state {
+      padding: 3.5rem 1rem;
+      text-align: center;
+      color: var(--muted);
+    }
+    .empty-state i { font-size: 2.5rem; opacity: .3; margin-bottom: .75rem; display: block; }
+    .empty-state p { font-size: .9rem; }
+
+    /* ====== PAGINATION ====== */
+    .pagination {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 1.25rem;
+      border-top: 1px solid var(--border);
+      font-size: .82rem; color: var(--muted);
+      flex-wrap: wrap; gap: .5rem;
+    }
+    .page-btns { display: flex; gap: .3rem; }
+    .page-btn {
+      width: 32px; height: 32px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .82rem; cursor: pointer; background: #fff;
+      transition: all .2s; color: var(--text);
+    }
+    .page-btn:hover, .page-btn.active {
+      background: var(--accent); color: #fff; border-color: var(--accent);
+    }
+
+    /* ====== MODAL ====== */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.45);
+      z-index: 200;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity .25s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: #fff;
+      border-radius: var(--radius);
+      width: min(560px, 95vw);
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+      transform: translateY(20px) scale(.97);
+      transition: transform .25s;
+    }
+    .modal-overlay.open .modal { transform: none; }
+    .modal-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-header h3 { font-size: 1rem; font-weight: 700; color: var(--brand); }
+    .modal-close {
+      width: 30px; height: 30px; border-radius: 6px;
+      border: none; background: #f0f4f8; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .9rem; color: var(--muted); transition: background .2s;
+    }
+    .modal-close:hover { background: #e2e8f0; }
+    .modal-body { padding: 1.5rem; }
+    .modal-body .field-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .modal-body .field-full { margin-bottom: 1rem; }
+    .modal-body label {
+      display: block; font-size: .78rem; font-weight: 600;
+      color: var(--muted); margin-bottom: .4rem; text-transform: uppercase; letter-spacing: .04em;
+    }
+    .modal-body input,
+    .modal-body select,
+    .modal-body textarea {
+      width: 100%; padding: .6rem .9rem;
+      border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+      font-size: .86rem; color: var(--text); background: #fff;
+      outline: none; transition: border-color .2s; font-family: inherit;
+    }
+    .modal-body input:focus,
+    .modal-body select:focus,
+    .modal-body textarea:focus { border-color: var(--accent); }
+    .modal-body textarea { resize: vertical; min-height: 90px; }
+    .modal-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--border);
+      display: flex; justify-content: flex-end; gap: .6rem;
+    }
+
+    /* ====== TOAST ====== */
+    .toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 999; display: flex; flex-direction: column; gap: .5rem; }
+    .toast {
+      background: #1a2a3a; color: #fff;
+      padding: .8rem 1.2rem; border-radius: 10px;
+      font-size: .84rem; font-weight: 500;
+      box-shadow: 0 4px 20px rgba(0,0,0,.2);
+      display: flex; align-items: center; gap: .6rem;
+      animation: slideIn .3s ease;
+      max-width: 320px;
+    }
+    .toast.success { border-left: 4px solid var(--green); }
+    .toast.error   { border-left: 4px solid var(--red); }
+    .toast.info    { border-left: 4px solid var(--accent); }
+    @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+    /* ====== RESPONSIVE ====== */
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: none; }
+      .main-wrapper { margin-left: 0; }
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .modal-body .field-row { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+      .kpi-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ====== TABS ====== */
+    .tabs { display: flex; gap: .3rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .tab-btn {
+      padding: .5rem 1rem; border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border); background: #fff;
+      font-size: .82rem; font-weight: 600; color: var(--muted);
+      cursor: pointer; transition: all .2s;
+    }
+    .tab-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    /* ====== SELECT STATUS INLINE ====== */
+    .status-select {
+      padding: .28rem .65rem;
+      border-radius: 999px;
+      border: 1.5px solid var(--border);
+      font-size: .74rem; font-weight: 600;
+      cursor: pointer; outline: none; background: #fff;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ====== SIDEBAR ====== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon"><i class="fas fa-city"></i></div>
+    <div class="logo-text">
+      <strong>SMR Admin</strong>
+      <span>Santa Marta Reporta</span>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Principal</div>
+    <a href="#" class="active" onclick="showSection('dashboard', this)">
+      <i class="fas fa-th-large"></i> Dashboard
+    </a>
+    <a href="#" onclick="showSection('incidencias', this)">
+      <i class="fas fa-exclamation-circle"></i> Incidencias
+      <span class="badge" id="sidebarPendientes">0</span>
+    </a>
+    <a href="#" onclick="showSection('cuadrillas', this)">
+      <i class="fas fa-hard-hat"></i> Cuadrillas
+    </a>
+    <a href="#" onclick="showSection('auditoria', this)">
+      <i class="fas fa-shield-alt"></i> Auditoría
+    </a>
+    <div class="nav-section-label" style="margin-top:.5rem">Sistema</div>
+    <a href="index.html">
+      <i class="fas fa-globe"></i> Portal Ciudadano
+    </a>
+    <a href="#" onclick="showSection('configuracion', this)">
+      <i class="fas fa-cog"></i> Configuración
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    Sistema de Gestión de<br>Incidencias Urbanas v2.0
+  </div>
+</aside>
+
+<!-- ====== MAIN ====== -->
+<div class="main-wrapper">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <button class="icon-btn" id="sidebarToggle" onclick="toggleSidebar()" title="Menú" style="display:none; border:none; font-size:1rem;">
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="topbar-title">
+      <h1 id="topbarTitle">Dashboard General</h1>
+      <p id="topbarSub">Resumen de incidencias · Santa Marta Reporta</p>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-primary btn-sm" onclick="openModal('nueva')">
+        <i class="fas fa-plus"></i> Nueva Incidencia
+      </button>
+      <div class="avatar" title="Administrador">AD</div>
+    </div>
+  </header>
+
+  <!-- ====== PAGE CONTENT ====== -->
+  <main class="page-content">
+
+    <!-- DASHBOARD -->
+    <div id="sec-dashboard">
+      <!-- KPI CARDS -->
+      <div class="kpi-grid" id="kpiGrid">
+        <div class="kpi-card total">
+          <div class="kpi-icon"><i class="fas fa-clipboard-list"></i></div>
+          <div class="kpi-info">
+            <div class="kpi-num" id="kpi-total">0</div>
+            <div class="kpi-label">Total Registradas</div>
+            <div class="kpi-trend up" id="kpi-total-trend"></div>
+          </div>
+        </div>
+        <div class="kpi-card espera">
+          <div class="kpi-icon"><i class="fas fa-clock"></i></div>
+          <div class="kpi-info">
+            <div class="kpi-num" id="kpi-espera">0</div>
+            <div class="kpi-label">En Espera</div>
+            <div class="kpi-trend" id="kpi-espera-trend"></div>
+          </div>
+        </div>
+        <div class="kpi-card activo">
+          <div class="kpi-icon"><i class="fas fa-tools"></i></div>
+          <div class="kpi-info">
+            <div class="kpi-num" id="kpi-activo">0</div>
+            <div class="kpi-label">En Intervención</div>
+            <div class="kpi-trend" id="kpi-activo-trend"></div>
+          </div>
+        </div>
+        <div class="kpi-card resuelto">
+          <div class="kpi-icon"><i class="fas fa-check-circle"></i></div>
+          <div class="kpi-info">
+            <div class="kpi-num" id="kpi-resuelto">0</div>
+            <div class="kpi-label">Resueltos</div>
+            <div class="kpi-trend up" id="kpi-resuelto-trend"></div>
+          </div>
+        </div>
+        <div class="kpi-card respaldo">
+          <div class="kpi-icon"><i class="fas fa-thumbs-up"></i></div>
+          <div class="kpi-info">
+            <div class="kpi-num" id="kpi-respaldo">0</div>
+            <div class="kpi-label">Total Respaldos</div>
+            <div class="kpi-trend up" id="kpi-respaldo-trend"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABS + TABLE en dashboard -->
+      <div class="section-header">
+        <h2><i class="fas fa-list-ul"></i> Últimas Incidencias</h2>
+        <button class="btn btn-outline btn-sm" onclick="exportarCSV()">
+          <i class="fas fa-file-csv"></i> Exportar CSV
+        </button>
+      </div>
+
+      <div class="tabs" id="dashTabs">
+        <button class="tab-btn active" onclick="filterTab('todos', this)">Todos</button>
+        <button class="tab-btn" onclick="filterTab('espera', this)">En Espera</button>
+        <button class="tab-btn" onclick="filterTab('intervencion', this)">En Intervención</button>
+        <button class="tab-btn" onclick="filterTab('resuelto', this)">Resueltos</button>
+      </div>
+
+      <div class="filter-bar">
+        <input type="text" id="searchInput" placeholder="🔍  Buscar por barrio, palaba clave…" oninput="renderTabla()" />
+        <select id="filtroCategoria" onchange="renderTabla()">
+          <option value="">Todas las Categorías</option>
+          <option value="Residuos y limpieza">Residuos y limpieza</option>
+          <option value="Vías y movilidad">Vías y movilidad</option>
+          <option value="Alumbrado público">Alumbrado público</option>
+          <option value="Fugas y agua">Fugas y agua</option>
+          <option value="Espacios públicos">Espacios públicos</option>
+        </select>
+        <select id="filtroEstado" onchange="renderTabla()">
+          <option value="">Todos los Estados</option>
+          <option value="espera">En Espera</option>
+          <option value="intervencion">En Intervención</option>
+          <option value="resuelto">Resuelto</option>
+          <option value="rechazado">Rechazado</option>
+        </select>
+      </div>
+
+      <div class="table-card">
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Radicación</th>
+                <th>Categoría</th>
+                <th>Ubicación y Sector</th>
+                <th>Descripción</th>
+                <th>Evidencia</th>
+                <th>Respaldos</th>
+                <th>Estado Operativo</th>
+                <th>Gestión de Cuadrilla</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tablaBody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="emptyState" style="display:none">
+          <i class="fas fa-search"></i>
+          <p>No se encontraron incidencias que coincidan con los criterios seleccionados.</p>
+        </div>
+        <div class="pagination" id="paginationBar">
+          <span id="paginationInfo"></span>
+          <div class="page-btns" id="pageButtons"></div>
+        </div>
+      </div>
+    </div><!-- /sec-dashboard -->
+
+    <!-- CUADRILLAS -->
+    <div id="sec-cuadrillas" style="display:none">
+      <div class="section-header">
+        <h2><i class="fas fa-hard-hat"></i> Gestión de Cuadrillas</h2>
+        <button class="btn btn-primary btn-sm" onclick="openModal('cuadrilla')">
+          <i class="fas fa-plus"></i> Nueva Cuadrilla
+        </button>
+      </div>
+      <div class="table-card">
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th>ID</th><th>Nombre</th><th>Responsable</th><th>Especialidad</th><th>Estado</th><th>Incidencias Asignadas</th><th>Acciones</th></tr>
+            </thead>
+            <tbody id="cuadrillasBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- AUDITORIA -->
+    <div id="sec-auditoria" style="display:none">
+      <div class="section-header">
+        <h2><i class="fas fa-shield-alt"></i> Registro de Auditoría</h2>
+      </div>
+      <div class="table-card">
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th>Fecha / Hora</th><th>Usuario</th><th>Acción</th><th>Objeto</th><th>Detalle</th></tr>
+            </thead>
+            <tbody id="auditoriaBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIGURACION -->
+    <div id="sec-configuracion" style="display:none">
+      <div class="section-header">
+        <h2><i class="fas fa-cog"></i> Configuración del Sistema</h2>
+      </div>
+      <div class="table-card" style="padding:1.5rem; max-width:500px;">
+        <div class="modal-body" style="padding:0">
+          <div class="field-full">
+            <label>Nombre del Sistema</label>
+            <input type="text" value="Sistema de Gestión de Incidencias Urbanas" />
+          </div>
+          <div class="field-full">
+            <label>Ciudad</label>
+            <input type="text" value="Santa Marta, Magdalena" />
+          </div>
+          <div class="field-full">
+            <label>Correo de Notificaciones</label>
+            <input type="email" value="admin@santamarta.gov.co" />
+          </div>
+          <div class="field-full" style="margin-top:1.25rem">
+            <button class="btn btn-primary" onclick="showToast('Configuración guardada', 'success')">
+              <i class="fas fa-save"></i> Guardar Cambios
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INCIDENCIAS (alias al dashboard) -->
+    <div id="sec-incidencias" style="display:none">
+      <div class="section-header">
+        <h2><i class="fas fa-exclamation-circle"></i> Todas las Incidencias</h2>
+        <button class="btn btn-outline btn-sm" onclick="exportarCSV()">
+          <i class="fas fa-file-csv"></i> Exportar CSV
+        </button>
+      </div>
+      <p style="color:var(--muted); font-size:.87rem; margin-bottom:1rem;">Vista completa del registro de incidencias reportadas por ciudadanos.</p>
+      <div id="sec-incidencias-inner"></div>
+    </div>
+
+  </main>
+</div><!-- /main-wrapper -->
+
+<!-- ====== MODAL ====== -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalIfOverlay(event)">
+  <div class="modal" id="modalBox">
+    <div class="modal-header">
+      <h3 id="modalTitle">Nueva Incidencia</h3>
+      <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer" id="modalFooter"></div>
+  </div>
+</div>
+
+<!-- ====== TOASTS ====== -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ============================================================
+//  DATOS Y ESTADO
+// ============================================================
+const STORAGE_KEY = 'smr_incidencias_admin';
+const AUDIT_KEY   = 'smr_auditoria';
+const CUA_KEY     = 'smr_cuadrillas';
+
+const CATEGORIAS = ['Residuos y limpieza','Vías y movilidad','Alumbrado público','Fugas y agua','Espacios públicos'];
+const ESTADOS    = ['espera','intervencion','resuelto','rechazado'];
+const BARRIOS    = ['El Rodadero','Centro Histórico','Gaira','Mamatoco','Manga','Taganga','San Jorge','El Pando','Bavaria','Pastrana'];
+const CUADRILLA_NOMBRES = ['Cuadrilla Alfa','Cuadrilla Beta','Cuadrilla Gamma','Cuadrilla Delta'];
+
+let incidencias  = [];
+let cuadrillas   = [];
+let auditoria    = [];
+let tabFiltro    = 'todos';
+let pagActual    = 1;
+const POR_PAGINA = 10;
+
+// ============================================================
+//  INIT
+// ============================================================
+function init() {
+  cargarDatos();
+  if (incidencias.length === 0) seedData();
+  if (cuadrillas.length === 0) seedCuadrillas();
+  actualizarKPIs();
+  renderTabla();
+  renderCuadrillas();
+  renderAuditoria();
+  updateSidebarBadge();
+  checkResponsive();
+}
+
+// ============================================================
+//  SEED DATA (datos de demo)
+// ============================================================
+function seedData() {
+  const desc = [
+    'Acumulación de basura en esquina sin recolección hace 5 días.',
+    'Hueco profundo en la calzada principal que afecta el tráfico.',
+    'Luminaria apagada desde hace una semana en zona residencial.',
+    'Fuga de agua visible en tubería expuesta del andén.',
+    'Mobiliario del parque deteriorado, bancas rotas y grafiti.',
+    'Punto crítico de basura en lote baldío, foco de vectores.',
+    'Señal de tránsito caída bloqueando parte de la vía.',
+    'Zona oscura peligrosa en calle sin alumbrado público.',
+    'Fuga de alcantarillado generando malos olores y riesgo sanitario.',
+    'Cancha comunal con rejas rotas y maleza invasora.',
+  ];
+  const now = Date.now();
+  incidencias = desc.map((d, i) => ({
+    id: `INC-${String(i+1).padStart(4,'0')}`,
+    fecha: new Date(now - (i * 86400000 * (Math.random()*3+1))).toISOString(),
+    categoria: CATEGORIAS[i % CATEGORIAS.length],
+    barrio: BARRIOS[i % BARRIOS.length],
+    sector: `Sector ${i+1}`,
+    descripcion: d,
+    evidencia: i % 3 === 0 ? 'foto_evidencia.jpg' : null,
+    respaldos: Math.floor(Math.random() * 30),
+    estado: ESTADOS[i % ESTADOS.length],
+    cuadrilla: i % 2 === 0 ? CUADRILLA_NOMBRES[i % CUADRILLA_NOMBRES.length] : null,
+    nombre_reportante: `Ciudadano ${i+1}`,
+  }));
+  guardarDatos();
+  logAuditoria('sistema', 'SEED', 'BD', 'Datos de demostración cargados');
+}
+
+function seedCuadrillas() {
+  cuadrillas = CUADRILLA_NOMBRES.map((n, i) => ({
+    id: `CUA-${String(i+1).padStart(3,'0')}`,
+    nombre: n,
+    responsable: `Ing. Responsable ${i+1}`,
+    especialidad: ['Residuos','Infraestructura vial','Alumbrado','Saneamiento'][i],
+    estado: ['asignado','libre','enCampo','libre'][i],
+    asignadas: Math.floor(Math.random()*5),
+  }));
+  localStorage.setItem(CUA_KEY, JSON.stringify(cuadrillas));
+}
+
+// ============================================================
+//  PERSISTENCIA
+// ============================================================
+function cargarDatos() {
+  incidencias = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  cuadrillas  = JSON.parse(localStorage.getItem(CUA_KEY) || '[]');
+  auditoria   = JSON.parse(localStorage.getItem(AUDIT_KEY) || '[]');
+
+  // Importar reportes del portal ciudadano si existen
+  const smrReportes = localStorage.getItem('smr_reportes_data');
+  if (smrReportes) {
+    try {
+      const externos = JSON.parse(smrReportes);
+      externos.forEach(r => {
+        if (!incidencias.find(i => i.id === r.id)) incidencias.push(r);
+      });
+    } catch(e) {}
+  }
+}
+
+function guardarDatos() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(incidencias));
+}
+
+function logAuditoria(usuario, accion, objeto, detalle) {
+  auditoria.unshift({ ts: new Date().toISOString(), usuario, accion, objeto, detalle });
+  if (auditoria.length > 200) auditoria.pop();
+  localStorage.setItem(AUDIT_KEY, JSON.stringify(auditoria));
+}
+
+// ============================================================
+//  KPIs
+// ============================================================
+function actualizarKPIs() {
+  const total     = incidencias.length;
+  const enEspera  = incidencias.filter(i => i.estado === 'espera').length;
+  const enActivo  = incidencias.filter(i => i.estado === 'intervencion').length;
+  const resueltos = incidencias.filter(i => i.estado === 'resuelto').length;
+  const respaldos = incidencias.reduce((s, i) => s + (i.respaldos || 0), 0);
+
+  animNum('kpi-total',    total);
+  animNum('kpi-espera',   enEspera);
+  animNum('kpi-activo',   enActivo);
+  animNum('kpi-resuelto', resueltos);
+  animNum('kpi-respaldo', respaldos);
+
+  document.getElementById('kpi-total-trend').textContent    = total ? `${total} incidencias en total` : '';
+  document.getElementById('kpi-espera-trend').textContent   = enEspera ? `⚠ Requieren atención` : '✓ Sin pendientes';
+  document.getElementById('kpi-espera-trend').className     = `kpi-trend ${enEspera ? 'down' : 'up'}`;
+  document.getElementById('kpi-activo-trend').textContent   = enActivo ? `${enActivo} en campo` : '';
+  document.getElementById('kpi-resuelto-trend').textContent = total ? `${Math.round(resueltos/total*100)}% tasa de resolución` : '';
+  document.getElementById('kpi-respaldo-trend').textContent = `${respaldos} ciudadanos respaldaron`;
+}
+
+function animNum(id, target) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  let current = parseInt(el.textContent) || 0;
+  const step = Math.max(1, Math.ceil((target - current) / 20));
+  const interval = setInterval(() => {
+    current = Math.min(current + step, target);
+    el.textContent = current;
+    if (current >= target) clearInterval(interval);
+  }, 30);
+}
+
+// ============================================================
+//  TABLA
+// ============================================================
+function getDatosFiltrados() {
+  const q      = (document.getElementById('searchInput')?.value || '').toLowerCase();
+  const cat    = document.getElementById('filtroCategoria')?.value || '';
+  const estado = document.getElementById('filtroEstado')?.value || '';
+
+  return incidencias.filter(inc => {
+    const matchQ     = !q || (inc.barrio+inc.descripcion+inc.id+inc.nombre_reportante).toLowerCase().includes(q);
+    const matchCat   = !cat   || inc.categoria === cat;
+    const matchEst   = !estado|| inc.estado === estado;
+    const matchTab   = tabFiltro === 'todos' || inc.estado === tabFiltro;
+    return matchQ && matchCat && matchEst && matchTab;
+  });
+}
+
+function renderTabla() {
+  const datos = getDatosFiltrados();
+  const tbody = document.getElementById('tablaBody');
+  const empty = document.getElementById('emptyState');
+  const pagInfo = document.getElementById('paginationInfo');
+
+  const totalPags = Math.ceil(datos.length / POR_PAGINA);
+  pagActual = Math.min(pagActual, totalPags || 1);
+  const slice = datos.slice((pagActual-1)*POR_PAGINA, pagActual*POR_PAGINA);
+
+  tbody.innerHTML = slice.map(inc => `
+    <tr id="row-${inc.id}">
+      <td class="td-id">${inc.id}</td>
+      <td class="td-date">${formatFecha(inc.fecha)}</td>
+      <td><span class="badge-cat ${catClass(inc.categoria)}">${inc.categoria}</span></td>
+      <td>
+        <div style="font-weight:600;font-size:.83rem">${inc.barrio}</div>
+        <div class="td-location">${inc.sector || ''}</div>
+      </td>
+      <td class="td-desc" title="${inc.descripcion}">${inc.descripcion}</td>
+      <td>
+        ${inc.evidencia
+          ? `<span class="evidence-pill" onclick="showToast('Evidencia: ${inc.evidencia}','info')">
+               <i class="fas fa-image"></i> Ver
+             </span>`
+          : `<span style="color:var(--muted);font-size:.78rem">—</span>`}
+      </td>
+      <td>
+        <span style="font-weight:700;color:var(--accent)">${inc.respaldos || 0}</span>
+        <span style="color:var(--muted);font-size:.75rem"> votos</span>
+      </td>
+      <td>
+        <select class="status-select" onchange="cambiarEstado('${inc.id}', this.value)" title="Cambiar estado">
+          ${ESTADOS.map(e => `<option value="${e}" ${inc.estado===e?'selected':''}>${estadoLabel(e)}</option>`).join('')}
+        </select>
+      </td>
+      <td>
+        ${inc.cuadrilla
+          ? `<span class="badge-op asignado"><i class="fas fa-hard-hat"></i> ${inc.cuadrilla}</span>`
+          : `<button class="btn btn-outline btn-sm" onclick="asignarCuadrilla('${inc.id}')"><i class="fas fa-plus"></i> Asignar</button>`}
+      </td>
+      <td>
+        <div class="td-actions">
+          <button class="icon-btn" onclick="openModal('ver','${inc.id}')" title="Ver detalle"><i class="fas fa-eye"></i></button>
+          <button class="icon-btn" onclick="openModal('editar','${inc.id}')" title="Editar"><i class="fas fa-edit"></i></button>
+          <button class="icon-btn danger" onclick="eliminarIncidencia('${inc.id}')" title="Eliminar"><i class="fas fa-trash"></i></button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  empty.style.display = slice.length === 0 ? 'block' : 'none';
+  pagInfo.textContent = datos.length
+    ? `Mostrando ${(pagActual-1)*POR_PAGINA+1}–${Math.min(pagActual*POR_PAGINA, datos.length)} de ${datos.length} incidencias`
+    : 'Sin resultados';
+
+  renderPagination(totalPags);
+  updateSidebarBadge();
+}
+
+function renderPagination(totalPags) {
+  const container = document.getElementById('pageButtons');
+  container.innerHTML = '';
+  for (let p = 1; p <= totalPags; p++) {
+    const btn = document.createElement('button');
+    btn.className = `page-btn ${p === pagActual ? 'active' : ''}`;
+    btn.textContent = p;
+    btn.onclick = () => { pagActual = p; renderTabla(); };
+    container.appendChild(btn);
+  }
+}
+
+function filterTab(estado, el) {
+  tabFiltro = estado;
+  pagActual = 1;
+  document.querySelectorAll('#dashTabs .tab-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderTabla();
+}
+
+// ============================================================
+//  ACCIONES
+// ============================================================
+function cambiarEstado(id, nuevoEstado) {
+  const inc = incidencias.find(i => i.id === id);
+  if (!inc) return;
+  const prev = inc.estado;
+  inc.estado = nuevoEstado;
+  guardarDatos();
+  actualizarKPIs();
+  logAuditoria('admin', 'CAMBIO_ESTADO', id, `${prev} → ${nuevoEstado}`);
+  showToast(`Estado actualizado: ${estadoLabel(nuevoEstado)}`, 'success');
+}
+
+function eliminarIncidencia(id) {
+  if (!confirm(`¿Eliminar incidencia ${id}? Esta acción no se puede deshacer.`)) return;
+  incidencias = incidencias.filter(i => i.id !== id);
+  guardarDatos();
+  actualizarKPIs();
+  renderTabla();
+  logAuditoria('admin', 'ELIMINAR', id, 'Incidencia eliminada');
+  showToast(`Incidencia ${id} eliminada`, 'error');
+}
+
+function asignarCuadrilla(id) {
+  const inc = incidencias.find(i => i.id === id);
+  if (!inc) return;
+  const opciones = cuadrillas.map(c => `<option value="${c.nombre}">${c.nombre} (${c.estado})</option>`).join('');
+  showModalHtml(
+    'Asignar Cuadrilla',
+    `<div class="field-full">
+       <label>Selecciona la cuadrilla para la incidencia <strong>${id}</strong></label>
+       <select id="selectCuadrilla">${opciones}</select>
+     </div>`,
+    `<button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+     <button class="btn btn-primary" onclick="confirmarAsignacion('${id}')">
+       <i class='fas fa-check'></i> Asignar
+     </button>`
+  );
+}
+
+function confirmarAsignacion(id) {
+  const sel = document.getElementById('selectCuadrilla');
+  if (!sel) return;
+  const inc = incidencias.find(i => i.id === id);
+  if (inc) {
+    inc.cuadrilla = sel.value;
+    guardarDatos();
+    renderTabla();
+    logAuditoria('admin', 'ASIGNAR_CUADRILLA', id, sel.value);
+    showToast(`Cuadrilla asignada: ${sel.value}`, 'success');
+  }
+  closeModal();
+}
+
+function exportarCSV() {
+  const datos = getDatosFiltrados();
+  const cols  = ['ID','Fecha','Categoria','Barrio','Sector','Descripcion','Respaldos','Estado','Cuadrilla'];
+  const rows  = datos.map(i => [
+    i.id, formatFecha(i.fecha), i.categoria, i.barrio, i.sector,
+    `"${i.descripcion.replace(/"/g,'""')}"`, i.respaldos, estadoLabel(i.estado), i.cuadrilla || ''
+  ].join(','));
+  const csv   = [cols.join(','), ...rows].join('\n');
+  const blob  = new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8'});
+  const a     = document.createElement('a');
+  a.href      = URL.createObjectURL(blob);
+  a.download  = `incidencias_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  logAuditoria('admin', 'EXPORTAR_CSV', 'BD', `${datos.length} registros`);
+  showToast(`CSV exportado: ${datos.length} registros`, 'success');
+}
+
+// ============================================================
+//  MODAL
+// ============================================================
+let modalMode = '';
+
+function openModal(mode, id) {
+  modalMode = mode;
+  const overlay = document.getElementById('modalOverlay');
+  const title   = document.getElementById('modalTitle');
+  const body    = document.getElementById('modalBody');
+  const footer  = document.getElementById('modalFooter');
+
+  if (mode === 'nueva') {
+    title.textContent = '➕ Nueva Incidencia';
+    body.innerHTML = formIncidenciaHTML({});
+    footer.innerHTML = `
+      <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarNuevaIncidencia()">
+        <i class="fas fa-save"></i> Guardar
+      </button>`;
+  } else if (mode === 'ver') {
+    const inc = incidencias.find(i => i.id === id);
+    title.textContent = `🔍 Detalle · ${id}`;
+    body.innerHTML = detalleIncidenciaHTML(inc);
+    footer.innerHTML = `<button class="btn btn-primary" onclick="closeModal()">Cerrar</button>`;
+  } else if (mode === 'editar') {
+    const inc = incidencias.find(i => i.id === id);
+    title.textContent = `✏️ Editar · ${id}`;
+    body.innerHTML = formIncidenciaHTML(inc);
+    footer.innerHTML = `
+      <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarEdicion('${id}')">
+        <i class="fas fa-save"></i> Actualizar
+      </button>`;
+  } else if (mode === 'cuadrilla') {
+    title.textContent = '🪖 Nueva Cuadrilla';
+    body.innerHTML = formCuadrillaHTML();
+    footer.innerHTML = `
+      <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarCuadrilla()">
+        <i class="fas fa-save"></i> Guardar
+      </button>`;
+  }
+  overlay.classList.add('open');
+}
+
+function showModalHtml(titulo, bodyHtml, footerHtml) {
+  document.getElementById('modalTitle').textContent = titulo;
+  document.getElementById('modalBody').innerHTML    = bodyHtml;
+  document.getElementById('modalFooter').innerHTML  = footerHtml;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+function closeModalIfOverlay(e) { if (e.target === document.getElementById('modalOverlay')) closeModal(); }
+
+function formIncidenciaHTML(inc) {
+  return `
+    <div class="field-row">
+      <div>
+        <label>Categoría</label>
+        <select id="f_categoria">
+          ${CATEGORIAS.map(c=>`<option ${inc.categoria===c?'selected':''}>${c}</option>`).join('')}
+        </select>
+      </div>
+      <div>
+        <label>Estado</label>
+        <select id="f_estado">
+          ${ESTADOS.map(e=>`<option value="${e}" ${inc.estado===e?'selected':''}>${estadoLabel(e)}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div>
+        <label>Barrio / Sector</label>
+        <input id="f_barrio" type="text" value="${inc.barrio||''}" placeholder="Ej. El Rodadero" />
+      </div>
+      <div>
+        <label>Nombre del reportante</label>
+        <input id="f_nombre" type="text" value="${inc.nombre_reportante||''}" placeholder="Ciudadano anónimo" />
+      </div>
+    </div>
+    <div class="field-full">
+      <label>Descripción de la incidencia</label>
+      <textarea id="f_desc" rows="4">${inc.descripcion||''}</textarea>
+    </div>
+    <div class="field-row">
+      <div>
+        <label>Respaldos (votos)</label>
+        <input id="f_respaldos" type="number" min="0" value="${inc.respaldos||0}" />
+      </div>
+      <div>
+        <label>Cuadrilla asignada</label>
+        <select id="f_cuadrilla">
+          <option value="">Sin asignar</option>
+          ${cuadrillas.map(c=>`<option ${inc.cuadrilla===c.nombre?'selected':''}>${c.nombre}</option>`).join('')}
+        </select>
+      </div>
+    </div>`;
+}
+
+function detalleIncidenciaHTML(inc) {
+  if (!inc) return '<p>No encontrado</p>';
+  const campo = (lbl, val) => `
+    <div style="margin-bottom:.9rem">
+      <div style="font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.3rem">${lbl}</div>
+      <div style="font-size:.9rem;color:var(--text)">${val||'—'}</div>
+    </div>`;
+  return `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 1.5rem">
+      ${campo('ID',inc.id)}
+      ${campo('Radicación',formatFecha(inc.fecha))}
+      ${campo('Categoría',`<span class="badge-cat ${catClass(inc.categoria)}">${inc.categoria}</span>`)}
+      ${campo('Estado',`<span class="badge-status ${inc.estado}">${estadoLabel(inc.estado)}</span>`)}
+      ${campo('Barrio',inc.barrio)}
+      ${campo('Sector',inc.sector)}
+      ${campo('Reportante',inc.nombre_reportante)}
+      ${campo('Respaldos',inc.respaldos)}
+      ${campo('Cuadrilla',inc.cuadrilla || 'No asignada')}
+      ${campo('Evidencia',inc.evidencia || 'Sin archivo adjunto')}
+    </div>
+    <div style="margin-top:.5rem">
+      <div style="font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:.3rem">Descripción</div>
+      <div style="font-size:.9rem;color:var(--text);background:#f8fafc;padding:.85rem;border-radius:8px;line-height:1.6">${inc.descripcion}</div>
+    </div>`;
+}
+
+function formCuadrillaHTML() {
+  return `
+    <div class="field-row">
+      <div>
+        <label>Nombre de la cuadrilla</label>
+        <input id="c_nombre" type="text" placeholder="Ej. Cuadrilla Épsilon" />
+      </div>
+      <div>
+        <label>Responsable</label>
+        <input id="c_resp" type="text" placeholder="Nombre del líder" />
+      </div>
+    </div>
+    <div class="field-full">
+      <label>Especialidad</label>
+      <select id="c_esp">
+        <option>Residuos</option>
+        <option>Infraestructura vial</option>
+        <option>Alumbrado</option>
+        <option>Saneamiento</option>
+        <option>Espacios públicos</option>
+      </select>
+    </div>`;
+}
+
+function guardarNuevaIncidencia() {
+  const nueva = {
+    id: `INC-${String(incidencias.length+1).padStart(4,'0')}`,
+    fecha: new Date().toISOString(),
+    categoria: document.getElementById('f_categoria').value,
+    estado:    document.getElementById('f_estado').value,
+    barrio:    document.getElementById('f_barrio').value || 'Sin especificar',
+    sector:    'Sector nuevo',
+    nombre_reportante: document.getElementById('f_nombre').value,
+    descripcion: document.getElementById('f_desc').value,
+    respaldos: parseInt(document.getElementById('f_respaldos').value)||0,
+    cuadrilla: document.getElementById('f_cuadrilla').value || null,
+    evidencia: null,
+  };
+  if (!nueva.descripcion.trim()) { showToast('La descripción es requerida', 'error'); return; }
+  incidencias.unshift(nueva);
+  guardarDatos();
+  actualizarKPIs();
+  renderTabla();
+  logAuditoria('admin', 'CREAR', nueva.id, nueva.descripcion.slice(0,60));
+  showToast(`Incidencia ${nueva.id} creada`, 'success');
+  closeModal();
+}
+
+function guardarEdicion(id) {
+  const inc = incidencias.find(i => i.id === id);
+  if (!inc) return;
+  inc.categoria    = document.getElementById('f_categoria').value;
+  inc.estado       = document.getElementById('f_estado').value;
+  inc.barrio       = document.getElementById('f_barrio').value;
+  inc.nombre_reportante = document.getElementById('f_nombre').value;
+  inc.descripcion  = document.getElementById('f_desc').value;
+  inc.respaldos    = parseInt(document.getElementById('f_respaldos').value)||0;
+  inc.cuadrilla    = document.getElementById('f_cuadrilla').value || null;
+  guardarDatos();
+  actualizarKPIs();
+  renderTabla();
+  logAuditoria('admin', 'EDITAR', id, 'Campos actualizados');
+  showToast(`Incidencia ${id} actualizada`, 'success');
+  closeModal();
+}
+
+function guardarCuadrilla() {
+  const nueva = {
+    id: `CUA-${String(cuadrillas.length+1).padStart(3,'0')}`,
+    nombre:       document.getElementById('c_nombre').value || 'Cuadrilla Nueva',
+    responsable:  document.getElementById('c_resp').value   || 'Sin responsable',
+    especialidad: document.getElementById('c_esp').value,
+    estado: 'libre', asignadas: 0,
+  };
+  cuadrillas.push(nueva);
+  localStorage.setItem(CUA_KEY, JSON.stringify(cuadrillas));
+  renderCuadrillas();
+  logAuditoria('admin', 'CREAR_CUADRILLA', nueva.id, nueva.nombre);
+  showToast(`Cuadrilla ${nueva.nombre} creada`, 'success');
+  closeModal();
+}
+
+// ============================================================
+//  CUADRILLAS TABLA
+// ============================================================
+function renderCuadrillas() {
+  const tbody = document.getElementById('cuadrillasBody');
+  if (!tbody) return;
+  tbody.innerHTML = cuadrillas.map(c => `
+    <tr>
+      <td class="td-id">${c.id}</td>
+      <td style="font-weight:600">${c.nombre}</td>
+      <td>${c.responsable}</td>
+      <td><span class="badge-cat">${c.especialidad}</span></td>
+      <td><span class="badge-op ${c.estado}">${estadoOpLabel(c.estado)}</span></td>
+      <td style="text-align:center;font-weight:700;color:var(--accent)">${c.asignadas}</td>
+      <td>
+        <div class="td-actions">
+          <button class="icon-btn" onclick="showToast('Editar cuadrilla próximamente','info')"><i class="fas fa-edit"></i></button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ============================================================
+//  AUDITORIA
+// ============================================================
+function renderAuditoria() {
+  const tbody = document.getElementById('auditoriaBody');
+  if (!tbody) return;
+  tbody.innerHTML = auditoria.slice(0, 50).map(a => `
+    <tr>
+      <td class="td-date">${formatFechaFull(a.ts)}</td>
+      <td style="font-weight:600">${a.usuario}</td>
+      <td><span class="badge-cat">${a.accion}</span></td>
+      <td style="font-family:monospace;font-size:.82rem">${a.objeto}</td>
+      <td style="color:var(--muted);font-size:.83rem">${a.detalle}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem">Sin registros de auditoría</td></tr>';
+}
+
+// ============================================================
+//  NAVEGACIÓN SECCIONES
+// ============================================================
+function showSection(sec, linkEl) {
+  ['dashboard','incidencias','cuadrillas','auditoria','configuracion'].forEach(s => {
+    const el = document.getElementById(`sec-${s}`);
+    if (el) el.style.display = s === sec ? 'block' : 'none';
+  });
+  document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+  if (linkEl) linkEl.classList.add('active');
+
+  const titles = {
+    dashboard:     ['Dashboard General', 'Resumen de incidencias · Santa Marta Reporta'],
+    incidencias:   ['Gestión de Incidencias', 'Registro completo de reportes ciudadanos'],
+    cuadrillas:    ['Cuadrillas Operativas', 'Equipos de trabajo en campo'],
+    auditoria:     ['Registro de Auditoría', 'Historial de cambios del sistema'],
+    configuracion: ['Configuración', 'Parámetros del sistema'],
+  };
+  const t = titles[sec] || ['Admin','Sistema'];
+  document.getElementById('topbarTitle').textContent = t[0];
+  document.getElementById('topbarSub').textContent   = t[1];
+
+  if (sec === 'incidencias') {
+    // Clonar el contenido del dashboard en incidencias
+    const inner = document.getElementById('sec-incidencias-inner');
+    if (inner && inner.children.length === 0) {
+      inner.appendChild(document.getElementById('filter-bar-clone') || createIncidenciasView());
+    }
+  }
+  if (sec === 'auditoria') renderAuditoria();
+}
+
+// ============================================================
+//  HELPERS
+// ============================================================
+function catClass(cat) {
+  const map = {
+    'Residuos y limpieza':'basura',
+    'Vías y movilidad':'vial',
+    'Alumbrado público':'alumbrado',
+    'Fugas y agua':'agua',
+    'Espacios públicos':'espacios',
+  };
+  return map[cat] || '';
+}
+
+function estadoLabel(e) {
+  return {espera:'En Espera', intervencion:'En Intervención', resuelto:'Resuelto', rechazado:'Rechazado'}[e] || e;
+}
+
+function estadoOpLabel(e) {
+  return {asignado:'Asignado', libre:'Disponible', enCampo:'En Campo'}[e] || e;
+}
+
+function formatFecha(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleDateString('es-CO', {day:'2-digit',month:'short',year:'numeric'});
+}
+
+function formatFechaFull(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleString('es-CO', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+}
+
+function updateSidebarBadge() {
+  const pendientes = incidencias.filter(i => i.estado === 'espera').length;
+  const badge = document.getElementById('sidebarPendientes');
+  if (badge) { badge.textContent = pendientes; badge.style.display = pendientes ? 'inline' : 'none'; }
+}
+
+// ============================================================
+//  TOAST
+// ============================================================
+function showToast(msg, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const icons = { success:'fa-check-circle', error:'fa-exclamation-circle', info:'fa-info-circle' };
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<i class="fas ${icons[type]||'fa-info-circle'}"></i> ${msg}`;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3500);
+}
+
+// ============================================================
+//  RESPONSIVE
+// ============================================================
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+function checkResponsive() {
+  const toggle = document.getElementById('sidebarToggle');
+  if (window.innerWidth <= 768) {
+    toggle.style.display = 'flex';
+  } else {
+    toggle.style.display = 'none';
+    document.getElementById('sidebar').classList.remove('open');
+  }
+}
+window.addEventListener('resize', checkResponsive);
+
+// ============================================================
+//  START
+// ============================================================
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
